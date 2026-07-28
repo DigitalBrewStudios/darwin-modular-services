@@ -33,7 +33,7 @@ let
     in
     ownEntries // subEntries;
 
-  daemonEntries = topName: top: translate.flatten { kind = "daemon"; } topName top;
+  daemonEntries = topName: top: translate.flatten { } topName top;
 in
 {
   options.system.services = mkOption {

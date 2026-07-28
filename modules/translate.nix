@@ -4,7 +4,6 @@
 let
   inherit (lib)
     concatMapAttrs
-    optionalAttrs
     ;
 
   dash =
@@ -16,47 +15,20 @@ let
     else
       "${before}-${after}";
 
-  toServiceConfig =
-    { kind, service }:
-    let
-      inherit (service) process processConfig;
-      cfg = processConfig;
-      argv = process.argv or [ ];
-      darwinExtras = service.launchd or { };
-    in
-    (optionalAttrs (argv != [ ]) {
-      ProgramArguments = argv;
-    })
-    // (optionalAttrs (kind == "daemon" && cfg.user != null) {
-      UserName = cfg.user;
-    })
-    // (optionalAttrs (kind == "daemon" && cfg.group != null) {
-      GroupName = cfg.group;
-    })
-    // (optionalAttrs (cfg.workingDirectory != null) {
-      WorkingDirectory = cfg.workingDirectory;
-    })
-    // (optionalAttrs (cfg.environment != { }) {
-      EnvironmentVariables = cfg.environment;
-    })
-    // (optionalAttrs (cfg.standardOutput != null) {
-      StandardOutPath = cfg.standardOutput;
-    })
-    // (optionalAttrs (cfg.standardError != null) {
-      StandardErrorPath = cfg.standardError;
-    })
-    // darwinExtras;
-
   # Walk a service (and its sub-services) producing a flat attrset of
   # launchd-entry configs keyed by dashed service path.
   flatten =
-    { kind }:
     let
       go =
         prefix: service:
+        let
+          process = service.process;
+        in
         {
           ${prefix} = {
-            serviceConfig = toServiceConfig { inherit kind service; };
+            command = (lib.optionalAttrs process.argv != [ ]) process.argv;
+            environment = (lib.optionalAttrs process.environment) process.environment;
+            serviceConfig = service.launchd or { };
           };
         }
         // concatMapAttrs (n: sub: go (dash prefix n) sub) (service.services or { });
@@ -64,5 +36,5 @@ let
     go;
 in
 {
-  inherit dash flatten toServiceConfig;
+  inherit dash flatten;
 }
