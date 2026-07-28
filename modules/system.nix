@@ -12,18 +12,18 @@ let
     types
     ;
 
-  rootPath = "/etc/system-services";
+  rootPath = "/Library/Application Support/org.nixos.modular-services";
 
   servicesLib = import ./lib.nix { inherit lib pkgs rootPath; };
   translate = import ./translate.nix { inherit lib; };
 
   # configData entries surface as etc files at the path computed by
-  # config-data.nix (e.g. /etc/system-services/<prefix>/<name>).
+  # config-data.nix (e.g. /Library/Application Support/org.nixos.modular-services/<prefix>/<name>).
   makeEtcFiles =
     prefix: service:
     let
       ownEntries = mapAttrs' (_: cfg: {
-        name = lib.removePrefix "/etc/" cfg.path;
+        name = lib.removePrefix "/Library/Application Support/org.nixos.modular-services" cfg.path;
         value = { inherit (cfg) enable source; };
       }) (lib.filterAttrs (_: cfg: cfg.enable) (service.configData or { }));
 

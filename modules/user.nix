@@ -14,15 +14,15 @@ let
 
   translate = import ./translate.nix { inherit lib; };
 
-  userRootPath = userName: "/Users/${userName}/.config/system-services";
+  userRootPath = user: "~${user}/Library/Application Support/org.nixos.modular-services";
 
   # Build a per-user serviceSubmodule type with the user's home baked
   # into configData paths.
   servicesLibFor =
-    userName:
+    user:
     import ./lib.nix {
       inherit lib pkgs;
-      rootPath = userRootPath userName;
+      rootPath = userRootPath user;
     };
 
   agentEntries =
@@ -90,8 +90,7 @@ let
         escUser = lib.escapeShellArg userName;
       in
       ''
-        sudo --user=${escUser} -- mkdir -p ~${escUser}/.config
-        sudo --user=${escUser} -- ln -sfn ${tree} ~${escUser}/.config/system-services
+        sudo --user=${escUser} -- ln -sfn ${tree} ~${escUser}/Library/Appliation Support/org.nixos.modular-services
       ''
     ) usersWithServices
   );
@@ -130,8 +129,7 @@ in
           userName: user:
           lib.concatLists (
             lib.mapAttrsToList (
-              n: service:
-              (servicesLibFor userName).getAssertions [ "users" "users" userName "services" n ] service
+              n: service: (servicesLibFor user).getAssertions [ "users" "users" userName "services" n ] service
             ) user.services
           )
         ) usersWithServices
