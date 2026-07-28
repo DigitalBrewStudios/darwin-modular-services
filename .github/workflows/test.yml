@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Nix
         uses: cachix/install-nix-action@v30
       - run: nix flake check
