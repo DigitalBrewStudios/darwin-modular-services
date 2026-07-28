@@ -31,6 +31,5 @@
           shim = self.darwinModules.default;
         }
       );
-
     };
 }

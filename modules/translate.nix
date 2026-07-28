@@ -21,14 +21,10 @@ let
     let
       go =
         prefix: service:
-        let
-          process = service.process;
-        in
         {
           ${prefix} = {
-            command = (lib.optionalAttrs process.argv != [ ]) process.argv;
-            environment = (lib.optionalAttrs process.environment) process.environment;
-            serviceConfig = service.launchd or { };
+            command = service.launchd.command;
+            serviceConfig = service.launchd.services or { };
           };
         }
         // concatMapAttrs (n: sub: go (dash prefix n) sub) (service.services or { });
