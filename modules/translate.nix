@@ -23,7 +23,7 @@ let
         prefix: service:
         {
           ${prefix} = {
-            command = service.launchd.command;
+            command = lib.escapeShellArgs service.process.argv;
             serviceConfig = service.launchd.services or { };
           };
         }

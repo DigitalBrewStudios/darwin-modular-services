@@ -28,7 +28,7 @@ let
   agentEntries =
     userName: topName: top:
     let
-      flat = translate.flatten { kind = "userAgent"; } topName top;
+      flat = translate.flatten topName top;
     in
     lib.mapAttrs (
       entryName: entry:
@@ -123,50 +123,16 @@ in
       userName: user: agentsForUser userName user.services
     ) usersWithServices;
 
-    assertions =
-      lib.concatLists (
-        lib.mapAttrsToList (
-          userName: user:
-          lib.concatLists (
-            lib.mapAttrsToList (
-              n: service: (servicesLibFor user).getAssertions [ "users" "users" userName "services" n ] service
-            ) user.services
-          )
-        ) usersWithServices
-      )
-      ++ lib.concatLists (
-        lib.mapAttrsToList (
-          userName: user:
-          lib.concatLists (
-            lib.mapAttrsToList (
-              n: service:
-              let
-                userAgentChecks = service: [
-                  {
-                    assertion = service.processConfig.user == null;
-                    message = ''
-                      `users.users.${userName}.services.${n}.processConfig.user`
-                      is set, but launchd user agents always run as the
-                      owning user. Remove `processConfig.user` or move
-                      the service to `system.services`.
-                    '';
-                  }
-                  {
-                    assertion = service.processConfig.group == null;
-                    message = ''
-                      `users.users.${userName}.services.${n}.processConfig.group`
-                      is set, but launchd user agents inherit the user's
-                      primary group. Remove `processConfig.group` or move
-                      the service to `system.services`.
-                    '';
-                  }
-                ];
-              in
-              userAgentChecks service
-            ) user.services
-          )
-        ) usersWithServices
-      );
+    assertions = lib.concatLists (
+      lib.mapAttrsToList (
+        userName: user:
+        lib.concatLists (
+          lib.mapAttrsToList (
+            n: service: (servicesLibFor user).getAssertions [ "users" "users" userName "services" n ] service
+          ) user.services
+        )
+      ) usersWithServices
+    );
 
     warnings = lib.concatLists (
       lib.mapAttrsToList (

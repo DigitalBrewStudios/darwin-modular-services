@@ -7,15 +7,6 @@ in
 
   options = {
     launchd = {
-      mainCommand = mkOption {
-        type = types.listOf types.str;
-        default = config.process.argv;
-        defaultText = lib.literalExpression "config.process.argv";
-        description = ''
-          					Command to run for the main program.
-          				'';
-      };
-
       services = mkOption {
         default = { };
         type = types.lazyAttrsOf (types.deferredModuleWith { });
